@@ -65,7 +65,7 @@
           </a>
 
           <div class="navbar-dropdown">
-            <a class="navbar-item">
+            <a class="navbar-item" href="./visualization-1.html">
               <span class="icon"><i class="fas fa-map"></i></span>
               <span> Prices Across Counties in the United States</span>
             </a>
@@ -87,7 +87,7 @@
           </a>
         </div>
       </div>
-    </div>
+
   </nav>
   <!-- End page navigation -->
   <svg width="960" height="600">
@@ -174,7 +174,7 @@
     let mapNameToId = new Map()
     // first map the county names to the data
     // do for february 2020 first
-    d3.csv("County_Zhvi_AllHomes.csv").then(function(data) {
+    d3.csv("./County_Zhvi_AllHomes.csv").then(function(data) {
       data.forEach((item, i) => {
           mapCountyToPrice.set(item.RegionName, item["2020-02"]);
       });
