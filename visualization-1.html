@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- TODO: Change title -->
+    <title>Website Template</title>
+
+    <!-- Load Bulma from CDN (consider saving it to repository instead) -->
+    <!-- https://bulma.io/ -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.0/css/bulma.min.css">
+
+    <!-- Load Font Awesome 5 (free) icons -->
+    <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+    <!-- D3 -->
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script src="https://d3js.org/topojson.v2.min.js"></script>
+    <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+  </head>
+
+  <body>
+
+  <!-- Page header -->
+  <!-- https://bulma.io/documentation/layout/hero/ -->
+  <section class="hero is-primary is-bold">
+    <div class="hero-body">
+      <div class="container">
+        <!-- TODO: Change title -->
+        <h1 class="title">Prices Across Counties in the United States</h1>
+        <!-- TODO: Change subtitle -->
+        <h2 class="subtitle">A Choropleth Map</h2>
+      </div>
+    </div>
+  </section>
+  <!-- End page header -->
+
+  <!-- Page navigation -->
+  <!-- https://bulma.io/documentation/components/navbar/ -->
+  <nav class="navbar is-light" role="navigation" aria-label="main navigation">
+    <div class="container">
+      <div class="navbar-brand">
+        <!-- TODO: Change link to repository homepage if needed -->
+        <!-- TODO: Change which navbar-item is-active if needed -->
+        <a class="navbar-item is-active" href="index.html">
+          <span class="icon"><i class="fas fa-home"></i></span>
+          <span>Home</span>
+        </a>
+
+        <a role="button" class="navbar-burger burger" aria-label="menu" aria-expanded="false" data-target="main-menu">
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </a>
+      </div>
+
+      <div id="main-menu" class="navbar-menu has-text-weight-medium">
+        <!-- Left navbar items -->
+
+
+
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link">
+            Visualizations
+          </a>
+
+          <div class="navbar-dropdown">
+            <a class="navbar-item">
+              <span class="icon"><i class="fas fa-map"></i></span>
+              <span> Prices Across Counties in the United States</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+        <!-- Right navbar items -->
+        <div class="navbar-end">
+          <!-- TODO: Update as needed -->
+          <a class="navbar-item" href="./dataset.html" title="Dataset">
+            <span class="icon"><i class="fas fa-tasks"></i></span>
+            <span>Dataset Information</span>
+          </a>
+
+          <a class="navbar-item" href="./about.html" title="About">
+            <span class="icon"><i class="fas fa-info-circle"></i></span>
+            <span>About</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+  <!-- End page navigation -->
+  <svg width="960" height="600">
+    <g id="tooltip" pointer-events="none"></g>
+    <g id="details" pointer-events="none"></g>
+    <g id="basemap" pointer-events="none"></g>
+  </svg>
+  <script>
+
+  var svg = d3.select("svg");
+
+  var path = d3.geoPath();
+
+  // set colors and legend
+  let domain = [0,100000, 200000, 300000, 400000, 500000, 600000, 700000, 800000];
+  let color = d3.scaleThreshold()
+    .domain(domain)
+    .range(d3.schemeBlues[9]);
+
+  let x = d3.scaleLinear()
+  .domain(domain)
+  .rangeRound([800, 840]);
+
+  let tooltip = svg.select("g#tooltip");
+  let details = svg.select("g#details");
+  let basemap = svg.select("g#basemap")
+  // this is bad
+
+  const tip = tooltip.append("text").attr("id", "tooltip");
+  tip.attr("text-anchor", "end");
+  tip.attr("dx", -5);
+  tip.attr("dy", -5);
+  tip.style("visibility", "hidden");
+  tooltip.style.transform = "translateY(50px)";
+
+  const details2 = details.append("foreignObject")
+  .attr("id", "details")
+  .attr("width", 960)
+  .attr("height", 500)
+  .attr("x", 0)
+  .attr("y", 0);
+
+  const body = details2.append("xhtml:body")
+    .style("text-align", "left")
+    .style("background", "none")
+    .html("<p>N/A</p>");
+
+  details.style("visibility", "hidden");
+
+  let g = svg.append("g")
+    .attr("class", "key")
+    .attr("transform", "translate(-220, 20)");
+
+  g.selectAll("rect")
+    .data(color.range().map(function(d) {
+        d = color.invertExtent(d);
+        if (d[0] == null) d[0] = x.domain()[0];
+        if (d[1] == null) d[1] = x.domain()[1];
+        return d;
+      }))
+    .enter().append("rect")
+      .attr("height", 8)
+      .attr("x", function(d) { return x(d[0]); })
+      .attr("width", function(d) { return x(d[1]) - x(d[0]); })
+      .attr("fill", function(d) { return color(d[0]); });
+
+  g.append("text")
+      .attr("class", "caption")
+      .attr("x", x.range()[0])
+      .attr("y", -6)
+      .attr("fill", "#000")
+      .attr("text-anchor", "start")
+      .attr("font-weight", "bold")
+      .text("Median Home Price");
+
+  g.call(d3.axisBottom(x)
+      .tickSize(13)
+      .tickFormat(function(x, i) { return i ? x : x; })
+      .tickValues(color.domain()))
+    .select(".domain")
+      .remove();
+
+    let mapCountyToPrice = new Map()
+    let mapNameToId = new Map()
+    // first map the county names to the data
+    // do for february 2020 first
+    d3.csv("County_Zhvi_AllHomes.csv").then(function(data) {
+      data.forEach((item, i) => {
+          mapCountyToPrice.set(item.RegionName, item["2020-02"]);
+      });
+
+    })
+    .catch(function(error){
+       console.log(error)
+    })
+
+    d3.json("https://d3js.org/us-10m.v2.json")
+    .then(function(us) {
+
+    svg.append("g")
+        .attr("class", "counties")
+        .selectAll("path")
+        .data(topojson.feature(us, us.objects.counties).features)
+        .enter().append("path")
+        .attr("fill", function(d) { return color(d.properties.price = mapCountyToPrice.get(d.properties.name)); })
+        .attr("d", path)
+        .append("title")
+        .text(function(d) { return d.properties.price });
+
+        // add tooltips
+        var toolTip = svg.selectAll('path').on("mouseover", function(d) {
+          handleMouseOver(d)
+          // this is price for whatever reason
+          tip.text(d.properties.name);
+          tip.style("visibility", "visible")
+        }).on("mouseout", function(d) {
+          handleMouseOut(d)
+          tip.style("visibility", "hidden");
+        })
+
+  svg.append("path")
+      .attr("class", "county-borders")
+      .attr("d", path(topojson.mesh(us, us.objects.counties, function(a, b) { return a !== b; })));
+
+  let vis = document.getElementsByClassName("counties")[0];
+  vis.style.transform = "translateY(50px)";
+}).catch(function(error) {
+  throw(error)
+});
+
+function handleMouseOver(d) {
+
+  // use template literal for the detail table
+  // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals
+  const html = `
+    <table id="tooltip-details" border="0" cellspacing="0" cellpadding="2">
+    <tbody>
+      <tr>
+        <th>Name:</th>
+        <td>${d.properties.name}</td>
+      </tr>
+      <tr>
+        <th>Price:</th>
+        <td>${d.properties.price}</td>
+      </tr>
+    </tbody>
+    </table>
+  `;
+
+  body.html(html);
+  details.style("visibility", "visible");
+}
+
+function handleMouseOut(d) {
+    details.style("visibility", "hidden");
+}
+
+    </script>
+    <!-- Mobile menu responsiveness -->
+    <!-- https://bulma.io/documentation/components/navbar/ -->
+    <style>
+
+    .counties :hover {
+      fill: red;
+  }
+
+  #tooltip-details {
+    margin: 10px 10px;
+  }
+
+  .county-borders {
+    fill: none;
+    stroke: #fff;
+    stroke-width: 0.5px;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    pointer-events: none;
+  }
+
+  </style>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
+
+    if ($navbarBurgers.length > 0) {
+      $navbarBurgers.forEach( el => {
+        el.addEventListener('click', () => {
+          const target = el.dataset.target;
+          const $target = document.getElementById(target);
+          el.classList.toggle('is-active');
+          $target.classList.toggle('is-active');
+        });
+      });
+    }
+  });
+  </script>
+  <!-- End mobile menu responsiveness -->
+  </body>
+
+</html>
