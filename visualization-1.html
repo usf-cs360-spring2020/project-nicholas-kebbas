@@ -97,154 +97,157 @@
     <g id="basemap" pointer-events="none"></g>
   </svg>
   <script>
+async function loadMap() {
+    var svg = d3.select("svg");
 
-  var svg = d3.select("svg");
+    var path = d3.geoPath();
 
-  var path = d3.geoPath();
+    // set colors and legend
+    let domain = [0,100000, 200000, 300000, 400000, 500000, 600000, 700000, 800000];
+    let color = d3.scaleThreshold()
+      .domain(domain)
+      .range(d3.schemeBlues[9]);
 
-  // set colors and legend
-  let domain = [0,100000, 200000, 300000, 400000, 500000, 600000, 700000, 800000];
-  let color = d3.scaleThreshold()
+    let x = d3.scaleLinear()
     .domain(domain)
-    .range(d3.schemeBlues[9]);
+    .rangeRound([800, 840]);
 
-  let x = d3.scaleLinear()
-  .domain(domain)
-  .rangeRound([800, 840]);
+    let tooltip = svg.select("g#tooltip");
+    let details = svg.select("g#details");
+    let basemap = svg.select("g#basemap")
+    // this is bad
 
-  let tooltip = svg.select("g#tooltip");
-  let details = svg.select("g#details");
-  let basemap = svg.select("g#basemap")
-  // this is bad
+    const tip = tooltip.append("text").attr("id", "tooltip");
+    tip.attr("text-anchor", "end");
+    tip.attr("dx", -5);
+    tip.attr("dy", -5);
+    tip.style("visibility", "hidden");
+    tooltip.style.transform = "translateY(50px)";
 
-  const tip = tooltip.append("text").attr("id", "tooltip");
-  tip.attr("text-anchor", "end");
-  tip.attr("dx", -5);
-  tip.attr("dy", -5);
-  tip.style("visibility", "hidden");
-  tooltip.style.transform = "translateY(50px)";
+    const details2 = details.append("foreignObject")
+    .attr("id", "details")
+    .attr("width", 960)
+    .attr("height", 500)
+    .attr("x", 300)
+    .attr("y", -10);
 
-  const details2 = details.append("foreignObject")
-  .attr("id", "details")
-  .attr("width", 960)
-  .attr("height", 500)
-  .attr("x", 300)
-  .attr("y", -10);
+    const body = details2.append("xhtml:body")
+      .style("text-align", "left")
+      .style("background", "none")
+      .html("<p>N/A</p>");
 
-  const body = details2.append("xhtml:body")
-    .style("text-align", "left")
-    .style("background", "none")
-    .html("<p>N/A</p>");
-
-  details.style("visibility", "hidden");
-
-  let g = svg.append("g")
-    .attr("class", "key")
-    .attr("transform", "translate(-220, 20)");
-
-  g.selectAll("rect")
-    .data(color.range().map(function(d) {
-        d = color.invertExtent(d);
-        if (d[0] == null) d[0] = x.domain()[0];
-        if (d[1] == null) d[1] = x.domain()[1];
-        return d;
-      }))
-    .enter().append("rect")
-      .attr("height", 8)
-      .attr("x", function(d) { return x(d[0]); })
-      .attr("width", function(d) { return x(d[1]) - x(d[0]); })
-      .attr("fill", function(d) { return color(d[0]); });
-
-  g.append("text")
-      .attr("class", "caption")
-      .attr("x", x.range()[0])
-      .attr("y", -6)
-      .attr("fill", "#000")
-      .attr("text-anchor", "start")
-      .attr("font-weight", "bold")
-      .text("Median Home Price");
-
-  g.call(d3.axisBottom(x)
-      .tickSize(13)
-      .tickFormat(function(x, i) { return i ? x : x; })
-      .tickValues(color.domain()))
-    .select(".domain")
-      .remove();
-
-    let mapCountyToPrice = new Map()
-    let mapNameToId = new Map()
-    // first map the county names to the data
-    // do for february 2020 first
-    d3.csv("./County_Zhvi_AllHomes.csv").then(function(data) {
-      data.forEach((item, i) => {
-          mapCountyToPrice.set(item.RegionName, item["2020-02"]);
-      });
-
-    })
-    .catch(function(error){
-       console.log(error)
-    })
-
-    d3.json("https://d3js.org/us-10m.v2.json")
-    .then(function(us) {
-
-    svg.append("g")
-        .attr("class", "counties")
-        .selectAll("path")
-        .data(topojson.feature(us, us.objects.counties).features)
-        .enter().append("path")
-        .attr("fill", function(d) { return color(d.properties.price = mapCountyToPrice.get(d.properties.name)); })
-        .attr("d", path)
-        .append("title")
-        .text(function(d) { return d.properties.price });
-
-        // add tooltips
-        var toolTip = svg.selectAll('path').on("mouseover", function(d) {
-          handleMouseOver(d)
-          // this is price for whatever reason
-          tip.text(d.properties.name);
-          tip.style("visibility", "visible")
-        }).on("mouseout", function(d) {
-          handleMouseOut(d)
-          tip.style("visibility", "hidden");
-        })
-
-  svg.append("path")
-      .attr("class", "county-borders")
-      .attr("d", path(topojson.mesh(us, us.objects.counties, function(a, b) { return a !== b; })));
-
-  let vis = document.getElementsByClassName("counties")[0];
-  vis.style.margin = "50px 50px";
-}).catch(function(error) {
-  throw(error)
-});
-
-function handleMouseOver(d) {
-
-  // use template literal for the detail table
-  // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals
-  const html = `
-    <table id="tooltip-details" border="0" cellspacing="0" cellpadding="2">
-    <tbody>
-      <tr>
-        <th>Name:</th>
-        <td>${d.properties.name}</td>
-      </tr>
-      <tr>
-        <th>Price:</th>
-        <td>${d.properties.price}</td>
-      </tr>
-    </tbody>
-    </table>
-  `;
-
-  body.html(html);
-  details.style("visibility", "visible");
-}
-
-function handleMouseOut(d) {
     details.style("visibility", "hidden");
+
+    let g = svg.append("g")
+      .attr("class", "key")
+      .attr("transform", "translate(-220, 20)");
+
+    g.selectAll("rect")
+      .data(color.range().map(function(d) {
+          d = color.invertExtent(d);
+          if (d[0] == null) d[0] = x.domain()[0];
+          if (d[1] == null) d[1] = x.domain()[1];
+          return d;
+        }))
+      .enter().append("rect")
+        .attr("height", 8)
+        .attr("x", function(d) { return x(d[0]); })
+        .attr("width", function(d) { return x(d[1]) - x(d[0]); })
+        .attr("fill", function(d) { return color(d[0]); });
+
+    g.append("text")
+        .attr("class", "caption")
+        .attr("x", x.range()[0])
+        .attr("y", -6)
+        .attr("fill", "#000")
+        .attr("text-anchor", "start")
+        .attr("font-weight", "bold")
+        .text("Median Home Price");
+
+    g.call(d3.axisBottom(x)
+        .tickSize(13)
+        .tickFormat(function(x, i) { return i ? x : x; })
+        .tickValues(color.domain()))
+      .select(".domain")
+        .remove();
+
+      let mapCountyToPrice = new Map()
+      let mapNameToId = new Map()
+      // first map the county names to the data
+      // do for february 2020 first
+      await d3.csv("./County_Zhvi_AllHomes.csv").then(function(data) {
+        data.forEach((item, i) => {
+            mapCountyToPrice.set(item.RegionName, item["2020-02"]);
+        });
+
+      })
+      .catch(function(error){
+         console.log(error)
+      })
+
+      d3.json("https://d3js.org/us-10m.v2.json")
+      .then(function(us) {
+
+      svg.append("g")
+          .attr("class", "counties")
+          .selectAll("path")
+          .data(topojson.feature(us, us.objects.counties).features)
+          .enter().append("path")
+          .attr("fill", function(d) { return color(d.properties.price = mapCountyToPrice.get(d.properties.name)); })
+          .attr("d", path)
+          .append("title")
+          .text(function(d) { return d.properties.price });
+
+          // add tooltips
+          var toolTip = svg.selectAll('path').on("mouseover", function(d) {
+            handleMouseOver(d)
+            // this is price for whatever reason
+            tip.text(d.properties.name);
+            tip.style("visibility", "visible")
+          }).on("mouseout", function(d) {
+            handleMouseOut(d)
+            tip.style("visibility", "hidden");
+          })
+
+    svg.append("path")
+        .attr("class", "county-borders")
+        .attr("d", path(topojson.mesh(us, us.objects.counties, function(a, b) { return a !== b; })));
+
+    let vis = document.getElementsByClassName("counties")[0];
+    vis.style.margin = "50px 50px";
+  }).catch(function(error) {
+    throw(error)
+  });
+
+  function handleMouseOver(d) {
+
+    // use template literal for the detail table
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals
+    const html = `
+      <table id="tooltip-details" border="0" cellspacing="0" cellpadding="2">
+      <tbody>
+        <tr>
+          <th>Name:</th>
+          <td>${d.properties.name}</td>
+        </tr>
+        <tr>
+          <th>Price:</th>
+          <td>${d.properties.price}</td>
+        </tr>
+      </tbody>
+      </table>
+    `;
+
+    body.html(html);
+    details.style("visibility", "visible");
+  }
+
+  function handleMouseOut(d) {
+      details.style("visibility", "hidden");
+  }
 }
+
+loadMap();
 
     </script>
     <!-- Mobile menu responsiveness -->
