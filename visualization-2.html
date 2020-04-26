@@ -27,9 +27,9 @@
     <div class="hero-body">
       <div class="container">
         <!-- TODO: Change title -->
-        <h1 class="title">Prices Across Counties in the United States</h1>
+        <h1 class="title">Housing Inventory Across States in the United States</h1>
         <!-- TODO: Change subtitle -->
-        <h2 class="subtitle">A Choropleth Map</h2>
+        <h2 class="subtitle">An Object Map</h2>
       </div>
     </div>
   </section>
@@ -69,7 +69,7 @@
               <span class="icon"><i class="fas fa-map"></i></span>
               <span> Prices Across Counties in the United States</span>
             </a>
-            <a class="navbar-item" href="./visualization-2.html">
+            <a class="navbar-item" href="#">
               <span class="icon"><i class="fas fa-map"></i></span>
               <span> Housing Inventory Across States in the United States</span>
             </a>
@@ -93,18 +93,39 @@
       </div>
 
   </nav>
+  <!-- Content Area -->
+  <section class="section">
+    <div class="container">
+      <!-- Begin page content -->
+      <div class="content">
+        <h2> Question </h2>
+        <p> Increased sales means increased inventory, which usually equates to increased demand. I'm looking at the differences in housing sales numbers between 2010 and 2019 to see where there has been an increase. My question is where are people moving and why?</p>
+        <h2> Answer </h2>
+        <p>From the looks of the visualization, there looks to be the largest percentage increase in invetory in North Carolina, South Carolina, and New Jersey. North Dakota is the only state to have a lower inventory in 2019 than in 2010. This will be interesting to look into in another visualization. California has the smallest percentage increase in new inventory between 2010 and 2019. </p>
+        <h2> Encoding </h2>
+        <p>The circles on the map indicate the percent change in housing inventory from February 2010 to February 2019. The size of the circle indicates the size of the percentage change (higher percentage increase equates to a larger circle). The color of the circle indicates the direction of change (green circle means an increase in inventory, while a red circle means a decrease in inventory). </p>
+        <h2> Planned Interactivity </h2>
+      </p> Tooltips will be helpful to indicate both the state name of the circle, as well as the percentage incease. I'd also like to implement an interface that allows the user to input the starting and ending month of the visualization, so that the visualization will be more of a useful tool, and not just a snapshot in time.</p>
+      <!-- End page content -->
+    </div>
+  </section>
   <!-- End page navigation -->
   <div id="tooltip-area"></div>
   <svg width="960" height="600">
     <g id="tooltip" pointer-events="none"></g>
     <g id="details" pointer-events="none"></g>
     <g id="basemap" pointer-events="none"></g>
+    <g id="overlay" pointer-events="none"></g>
   </svg>
   <script>
 async function loadMap() {
+    let width = 960;
+    let height = 600;
     var svg = d3.select("svg");
-
     var path = d3.geoPath();
+
+    //Define path generator
+    // set projection
 
     // set colors and legend
     let domain = [0,100000, 200000, 300000, 400000, 500000, 600000, 700000, 800000];
@@ -118,7 +139,8 @@ async function loadMap() {
 
     let tooltip = svg.select("g#tooltip");
     let details = svg.select("g#details");
-    let basemap = svg.select("g#basemap")
+    let basemap = svg.select("g#basemap");
+    let overlay = svg.select("g#overlay");
     // this is bad
 
     const tip = tooltip.append("text").attr("id", "tooltip");
@@ -142,48 +164,40 @@ async function loadMap() {
 
     details.style("visibility", "hidden");
 
-    let g = svg.append("g")
+    basemapMap = basemap.append("g")
       .attr("class", "key")
-      .attr("transform", "translate(-220, 20)");
+      //.attr("transform", "translate(-220, 20)");
 
-    g.selectAll("rect")
-      .data(color.range().map(function(d) {
-          d = color.invertExtent(d);
-          if (d[0] == null) d[0] = x.domain()[0];
-          if (d[1] == null) d[1] = x.domain()[1];
-          return d;
-        }))
-      .enter().append("rect")
-        .attr("height", 8)
-        .attr("x", function(d) { return x(d[0]); })
-        .attr("width", function(d) { return x(d[1]) - x(d[0]); })
-        .attr("fill", function(d) { return color(d[0]); });
+    overlayedMap = overlay.append("g")
+      .attr("class", "key")
+      //.attr("transform", "translate(-220, 20)");
 
-    g.append("text")
-        .attr("class", "caption")
-        .attr("x", x.range()[0])
-        .attr("y", -6)
-        .attr("fill", "#000")
-        .attr("text-anchor", "start")
-        .attr("font-weight", "bold")
-        .text("Median Home Price");
-
-    g.call(d3.axisBottom(x)
-        .tickSize(13)
-        .tickFormat(function(x, i) { return i ? x : x; })
-        .tickValues(color.domain()))
-      .select(".domain")
-        .remove();
-
-      let mapCountyToPrice = new Map()
-      let mapNameToId = new Map()
+      let mapStateToPrice2010 = new Map()
+      let mapStateToPrice2019 = new Map()
+      let mapStateToPriceDifference = new Map()
       // first map the county names to the data
-      // do for february 2020 first
-      await d3.csv("./County_Zhvi_AllHomes.csv").then(function(data) {
-        data.forEach((item, i) => {
-            mapCountyToPrice.set(item.RegionName, item["2020-02"]);
-        });
+      // circle stuff
+      var colors = ["#EDF8FB","#41083e"];
 
+      // var circleSize = d3.scaleLinear().range([0,1.5]).domain([0, 1.5]);
+      //
+      // var lineSize = d3.scaleLinear().range([0,1.5]).domain([0, 1.5]);
+      //
+      // var fillcolor = d3.scaleLinear().range(colors).domain(immdomain);
+
+      // do for february 2020 first
+      await d3.csv("./Sale_Counts_Seas_Adj_State.csv").then(function(data) {
+        data.forEach((item, i) => {
+            mapStateToPrice2010.set(item.RegionName, item["2012-06"]);
+            mapStateToPrice2019.set(item.RegionName, item["2019-06"]);
+            let price2010 = mapStateToPrice2010.get(item.RegionName);
+            let price2019 = mapStateToPrice2019.get(item.RegionName);
+            // turn to a percentage
+            let priceDifference = (parseInt(price2019) - parseInt(price2010))/parseInt(price2010);
+            mapStateToPriceDifference.set(item.RegionName, priceDifference);
+            console.log(item)
+            console.log(mapStateToPriceDifference.get(item.RegionName))
+        });
       })
       .catch(function(error){
          console.log(error)
@@ -191,20 +205,45 @@ async function loadMap() {
 
       d3.json("https://d3js.org/us-10m.v2.json")
       .then(function(us) {
-
-      svg.append("g")
-          .attr("class", "counties")
-          .selectAll("path")
-          .data(topojson.feature(us, us.objects.counties).features)
-          .enter().append("path")
-          .attr("fill", function(d) { return color(d.properties.price = mapCountyToPrice.get(d.properties.name)); })
-          .attr("d", path)
-          .append("title")
-          .text(function(d) { return d.properties.price });
-
-          // add tooltips
-          var toolTip = svg.selectAll('path').on("mouseover", function(d) {
-            handleMouseOver(d)
+        function appendCircles() {
+          let circleSize = d3.scaleLinear().range([0,1]).domain([0, 1]);
+         overlayedMap.selectAll("cirle")
+          .data(topojson.feature(us, us.objects.states).features)
+          .enter().append("circle")
+          .attr("cx", function(d) {
+            console.log(d.properties)
+            var centname = d.properties.name;
+            var ctroid;
+            ctroid = path.centroid(d)[0];
+            return ctroid;
+          })
+          .attr("cy", function(d) {
+            var centname = d.properties.name;
+            var ctroid;
+            ctroid = path.centroid(d)[1];
+            return ctroid;
+          })
+          .attr("cz", 1000)
+          .attr("r", function(d) {
+            var diff = d.properties.price * 3000;
+            return circleSize(Math.sqrt(Math.abs(diff)/Math.PI));
+          })
+          .attr("class", "circ")
+          .attr("id", function(d) {return d.abbrev;})
+          .attr("fill", function(d) {
+            var diff = d.properties.price;
+            if(diff>0) {
+            return "#65a89d";
+            } else {
+            return "#a96a46";
+            }
+          })
+          .attr("fill-opacity", "0.5")
+          .attr("stroke", "#fff")
+          .attr("stroke-weight", "0.5")
+          .on("mouseover", function(d) {
+            //handleMouseOver(d)
+            console.log("hello")
             // this is price for whatever reason
             tip.text(d.properties.name);
             tip.style("visibility", "visible")
@@ -212,16 +251,49 @@ async function loadMap() {
             handleMouseOut(d)
             tip.style("visibility", "hidden");
           })
+        }
 
-    svg.append("path")
-        .attr("class", "county-borders")
-        .attr("d", path(topojson.mesh(us, us.objects.counties, function(a, b) { return a !== b; })));
+        function drawMap() {
+          basemapMap.append("g")
+            .attr("class", "states")
+            .selectAll("path")
+            .data(topojson.feature(us, us.objects.states).features)
+            .enter().append("path")
+            .attr("cz", -1)
+            .attr("fill", function(d) { return color(d.properties.price = mapStateToPriceDifference.get(d.properties.name)); })
+            .attr("d", path)
 
-    let vis = document.getElementsByClassName("counties")[0];
-    vis.style.margin = "50px 50px";
+
+            basemapMap.append("path")
+                .attr("class", "state-borders")
+                .attr("d", path(topojson.mesh(us, us.objects.states, function(a, b) { return a !== b; })))
+
+
+            // add tooltips
+
+        }
+        function assignTooltip()  {
+          basemapMap.selectAll('path').on("mouseover", function(d) {
+          handleMouseOver(d)
+          // this is price for whatever reason
+          tip.text(d.properties.name);
+          tip.style("visibility", "visible")
+        }).on("mouseout", function(d) {
+          handleMouseOut(d)
+          tip.style("visibility", "hidden");
+        })
+        let vis = document.getElementsByClassName("states")[0];
+                    //vis.style.margin = "50px 50px";
+      }
+        setTimeout(appendCircles, 100)
+        setTimeout(assignTooltip, 200)
+        setTimeout(drawMap, 0)
+
   }).catch(function(error) {
     throw(error)
   });
+
+
 
   function handleMouseOver(d) {
 
@@ -258,15 +330,21 @@ loadMap();
     <!-- https://bulma.io/documentation/components/navbar/ -->
     <style>
 
-    .counties :hover {
+    .states :hover {
       fill: red;
+  }
+  .states {
+    z-index: -100
   }
 
   #tooltip-details {
     margin: 10px 10px;
   }
+  .circ {
+    z-index:1000;
+  }
 
-  .county-borders {
+  .state-borders {
     fill: none;
     stroke: #fff;
     stroke-width: 0.9px;
