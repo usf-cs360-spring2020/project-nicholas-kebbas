@@ -10,6 +10,7 @@
     <!-- Load Bulma from CDN (consider saving it to repository instead) -->
     <!-- https://bulma.io/ -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.0/css/bulma.min.css">
+    <link rel="stylesheet" href="./styles.css">
 
     <!-- Load Font Awesome 5 (free) icons -->
     <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
@@ -73,6 +74,10 @@
               <span class="icon"><i class="fas fa-map"></i></span>
               <span> Housing Inventory Across States in the United States</span>
             </a>
+            <a class="navbar-item" href="./final-visualization.html">
+              <span class="icon"><i class="fas fa-map"></i></span>
+              <span>Final Visualization</span>
+            </a>
           </div>
         </div>
       </div>
@@ -93,6 +98,23 @@
       </div>
 
   </nav>
+  <!-- Selector -->
+  <p>Choose Year:
+  <select id="option-start">
+    <option value="2008-06" selected>2008</option>
+    <option value="2009-06">2009</option>
+    <option value="2010-06">2010</option>
+    <option value="2011-06">2011</option>
+    <option value="2012-06">2012</option>
+    <option value="2013-06">2013</option>
+    <option value="2014-06">2014</option>
+    <option value="2015-06">2015</option>
+    <option value="2016-06">2016</option>
+    <option value="2017-06">2017</option>
+    <option value="2018-06">2018</option>
+    <option value="2019-06">2019</option>
+  </select>
+</p>
   <!-- End page navigation -->
   <div id="tooltip-area"></div>
   <svg width="960" height="600">
@@ -100,9 +122,31 @@
     <g id="details" pointer-events="none"></g>
     <g id="basemap" pointer-events="none"></g>
   </svg>
+
+
   <script>
-async function loadMap() {
-    var svg = d3.select("svg");
+  var svg = d3.select("svg");
+  d3.select("#option-start").on("change", change);
+  let startingDate;
+  let startingString;
+  async function startingData() {
+    startingString = "2019-06";
+  }
+
+  async function change() {
+    function updateDate() {
+      console.log("change")
+      svg.selectAll("circle").remove()
+      svg.selectAll("foreignObject").remove()
+
+      optionStart = document.getElementById("option-start");
+      startingDate = optionStart.options[optionStart.selectedIndex].value;
+      console.log(startingDate);
+    }
+    await updateDate()
+    loadMapPrice(startingDate);
+  }
+async function loadMapPrice(startingDate) {
 
     var path = d3.geoPath();
 
@@ -129,11 +173,11 @@ async function loadMap() {
     tooltip.style.transform = "translateY(50px)";
 
     const details2 = details.append("foreignObject")
-    .attr("id", "details")
-    .attr("width", 960)
-    .attr("height", 500)
-    .attr("x", 300)
-    .attr("y", -10);
+      .attr("id", "details")
+      .attr("width", 960)
+      .attr("height", 500)
+      .attr("x", 300)
+      .attr("y", -10);
 
     const body = details2.append("xhtml:body")
       .style("text-align", "left")
@@ -181,7 +225,7 @@ async function loadMap() {
       // do for february 2020 first
       await d3.csv("./County_Zhvi_AllHomes.csv").then(function(data) {
         data.forEach((item, i) => {
-            mapCountyToPrice.set(item.RegionName, item["2020-02"]);
+            mapCountyToPrice.set(item.RegionName, item[startingDate]);
         });
 
       })
@@ -251,7 +295,12 @@ async function loadMap() {
   }
 }
 
-loadMap();
+async function runEverything() {
+  await startingData();
+  await loadMapPrice(startingString);
+}
+
+runEverything();
 
     </script>
     <!-- Mobile menu responsiveness -->
