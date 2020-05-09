@@ -100,7 +100,7 @@
   </nav>
   <!-- Selector -->
   <p>Choose Year:
-  <select id="option-start">
+  <select id="option-start-2">
     <option value="2008-06" selected>2008</option>
     <option value="2009-06">2009</option>
     <option value="2010-06">2010</option>
@@ -116,30 +116,30 @@
   </select>
 </p>
   <!-- End page navigation -->
-  <div id="tooltip-area"></div>
-  <svg width="960" height="600">
-    <g id="tooltip" pointer-events="none"></g>
-    <g id="details" pointer-events="none"></g>
-    <g id="basemap" pointer-events="none"></g>
+  <div id="tooltip-area-2"></div>
+  <svg id="svg2" width="960" height="600">
+    <g id="tooltip-2" pointer-events="none"></g>
+    <g id="details-2" pointer-events="none"></g>
+    <g id="basemap-2" pointer-events="none"></g>
   </svg>
 
 
   <script>
-  var svg = d3.select("svg");
-  d3.select("#option-start").on("change", change);
+  var svg = d3.select("#svg2");
+  d3.select("#option-start-2").on("change", change2);
   let startingDate;
   let startingString;
-  async function startingData() {
+  async function startingData2() {
     startingString = "2019-06";
   }
 
-  async function change() {
+  async function change2() {
     function updateDate() {
       console.log("change")
       svg.selectAll("circle").remove()
       svg.selectAll("foreignObject").remove()
 
-      optionStart = document.getElementById("option-start");
+      optionStart = document.getElementById("option-start-2");
       startingDate = optionStart.options[optionStart.selectedIndex].value;
       console.log(startingDate);
     }
@@ -160,9 +160,9 @@ async function loadMapPrice(startingDate) {
     .domain(domain)
     .rangeRound([800, 840]);
 
-    let tooltip = svg.select("g#tooltip");
-    let details = svg.select("g#details");
-    let basemap = svg.select("g#basemap")
+    let tooltip = svg.select("g#tooltip-2");
+    let details = svg.select("g#details-2");
+    let basemap = svg.select("g#basemap-2")
     // this is bad
 
     const tip = tooltip.append("text").attr("id", "tooltip");
@@ -295,12 +295,12 @@ async function loadMapPrice(startingDate) {
   }
 }
 
-async function runEverything() {
-  await startingData();
+async function runEverything2() {
+  await startingData2();
   await loadMapPrice(startingString);
 }
 
-runEverything();
+runEverything2();
 
     </script>
     <!-- Mobile menu responsiveness -->

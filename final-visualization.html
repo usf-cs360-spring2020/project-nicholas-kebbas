@@ -107,21 +107,37 @@
       <!-- Begin page content -->
       <div class="content">
         <h2> Question </h2>
-        <p> Increased sales means increased inventory, which usually equates to increased demand. I'm looking at the differences in housing sales numbers between 2010 and 2019 to see where there has been an increase. My question is where are people moving and why?</p>
+        <p>Is there a relationship between a change in the number of houses sold and a change in the home values of a state?</p>
         <h2> Answer </h2>
-        <p>From the looks of the visualization, there looks to be the largest percentage increase in invetory in North Carolina, South Carolina, and New Jersey. North Dakota is the only state to have a lower inventory in 2019 than in 2010. This will be interesting to look into in another visualization. California has the smallest percentage increase in new inventory between 2010 and 2019. </p>
-        <h2> Encoding </h2>
-        <p>The circles on the map indicate the percent change in housing inventory between selected years. The size of the circle indicates the size of the percentage change (higher percentage increase equates to a larger circle). The color of the circle, and the state underneath, indicates the direction of change (green circle and darker blue state means an increase in inventory, while a red circle and lighter blue state means a decrease in inventory). </p>
-        <h2>Interactivity </h2>
-      </p>
-      <ul>
-      <li>Tooltips indicate both the state name of the circle, as well as the percentage change between years. </li>
-      <li>The user can input the starting and ending year of the visualization, so that they can visualize the change in inventory over any given period of time between 2008 and 2019.</li>
-      </p>
+        <p>Overall, because of the number of different factors that go into finding this relationship, as well as economic factors, it's difficult to fully answer this question. However, using the visualizations on this page, we can make certain assumptions as to why home values are changing on a state by state basis, where people are buying houses, when people have bought homes in the past, the effects these increases in demand had on the state's supply, and how the state reacted in various cases to changes in demand.</p>
+        <p>There are multiple cases worth analyzing, since the visualizations let you view both number of house sales, as well as home values time.  To simplify the analysis, we'll group the states into multiple categories:
+          <ul>
+          <li>States where there was a <b>significant increase in home value</b>, but <b>not a significant increase in number of sales</b>. These states need to produce more inventory to keep up with demand (if geographically possible), or lower potentially artificially inflated home values. (States: California, Nevada, Hawaii, Colorado, Washington D.C.)</li>
+          <li>States where there was <b>not a significant increase in home value</b>, but there was a <b>significant increase in number of sales</b>. This signals that people may be moving to this state, but there's a sufficient supply such that house prices are not increasing. (South Dakota, Georgia, South Carolina, North Carolina, Tennessee, Vermont)</li>
+          <li>States where there was a <b>significant increase in home value</b>, and a <b>significant increase in number of sales</b>. This signals that people are coming to these states at a faster rate than supply is increasing, as the state is successfully expanding available inventory, as well as demand. (Washington, Portland, Florida, Texas)</li>
+          <li>States where there was a <b>decrease in home value</b>, and a minimal increase, <b>no increase, or decrease</b>, in sales. This indicates there's minimal demand to move to this state, and the state will need to increase demand to move there in any number of ways. (West Virginia)</li>
+        </ul>
+        <p> <b>Please note</b> that the states indicated to be in each category are generalized over the timespan between 2010 and 2019, by the category in which the state was found most often. Each state could technically be found in any category, depending on the specific year being analyzed.</p>
+
+          <p>We'll do some case studies below on certain states to provide additional clarification on why certain states are in certain categories, to help with interpretation of the visualizations.</p>
+          <h3> Case Studies: California, South Carolina, Florida, and West Virginia</h3>
+          In California, between 2010 and 2019, there's a fairly minimal increase in housing sales on Zillow.  California is also very noticably expensive to live in (as seen in the second visualization). Thus, it seems that houses in California aren't really changing hands at the rate that houses in other states are. People aren't really buying houses in California, potentially because the prices are too high.
+          In Arizona, there's a significant increase in number of sales between 2008 and 2019. The Median Home values also increases significantly between the years 2008 and 2019.  </p>
+      <h2>Potential Issues</h2>
+      <p> These datasets are from Zillow, so the data is influenced by the popularity and use of Zillow in those states. </p>
+
       <!-- End page content -->
-    </div>
-  </section>
+
   <!-- End page navigation -->
+  <h2> Visualization of Housing Sales Changes over Time across the United States </h2>
+  <h3> Encoding </h3>
+
+  <p>The circles on the map indicate the percent change in housing sales between selected years (this was incorrectly described as "housing inventory" in the beta version). The size of the circle indicates the size of the percentage change (higher percentage increase equates to a larger circle). The color of the circle, and the state underneath, indicates the direction of change (green circle and darker blue state means an increase in number of sales, while a red circle and lighter blue state means a decrease in number of sales). </p>
+  <h3>Interactivity</h3>
+<ul>
+<li>Tooltips indicate both the state name of the circle, as well as the percentage change in number of sales between those years. </li>
+<li>The user can input the starting and ending year of the visualization, so that they can visualize the change in number of house sales over any given period of time between 2008 and 2019.</li>
+</ul>
   <div id="tooltip-area"></div>
   <p>Choose Starting Year:
 	<select id="option-start">
@@ -155,11 +171,45 @@
       <option value="2019-06">2019</option>
   	</select>
 </p>
+</div>
+</section>
   <svg width="960" height="600">
     <g id="tooltip" pointer-events="none"></g>
     <g id="details" pointer-events="none"></g>
     <g id="basemap" pointer-events="none"></g>
     <g id="overlay" pointer-events="none"></g>
+  </svg>
+<section class="section">
+  <div class="container">
+    <div class="content">
+    <h2> Prices Across Counties in the United States</h2>
+    <h3>Encoding</h3>
+    <p>Home values are encoded by color by county; higher home values are typically a darker shade of blue than lower home values, as indicated by the legend.</p>
+
+      <p>Choose Year:
+        <select id="option-start-2">
+          <option value="2008-06" selected>2008</option>
+          <option value="2009-06">2009</option>
+          <option value="2010-06">2010</option>
+          <option value="2011-06">2011</option>
+          <option value="2012-06">2012</option>
+          <option value="2013-06">2013</option>
+          <option value="2014-06">2014</option>
+          <option value="2015-06">2015</option>
+          <option value="2016-06">2016</option>
+          <option value="2017-06">2017</option>
+          <option value="2018-06">2018</option>
+          <option value="2019-06">2019</option>
+        </select>
+      </p>
+    </div>
+  </div>
+</section>
+  <div id="tooltip-area-2"></div>
+  <svg id="svg2" width="960" height="600">
+    <g id="tooltip-2" pointer-events="none"></g>
+    <g id="details-2" pointer-events="none"></g>
+    <g id="basemap-2" pointer-events="none"></g>
   </svg>
   <script>
   // attach event listener
@@ -414,6 +464,187 @@
     }
 
   </style>
+
+  <!-- Second Visualization -->
+  <script>
+  let svg2 = d3.select("#svg2");
+  d3.select("#option-start-2").on("change", change2);
+  let startingDate2;
+  let startingString2;
+  async function startingData2() {
+    startingString2 = "2019-06";
+  }
+
+  async function change2() {
+    function updateDate() {
+      console.log("change")
+      svg2.selectAll("circle").remove()
+      svg2.selectAll("foreignObject").remove()
+
+      optionStart2 = document.getElementById("option-start-2");
+      startingDate2 = optionStart2.options[optionStart2.selectedIndex].value;
+      console.log(startingDate2);
+    }
+    await updateDate()
+    loadMapPrice(startingDate2);
+  }
+async function loadMapPrice(startingDate) {
+
+    var path2 = d3.geoPath();
+
+    // set colors and legend
+    let domain2 = [0,100000, 200000, 300000, 400000, 500000, 600000, 700000, 800000];
+    let color2 = d3.scaleThreshold()
+      .domain(domain2)
+      .range(d3.schemeBlues[9]);
+
+    let x2 = d3.scaleLinear()
+    .domain(domain2)
+    .rangeRound([800, 840]);
+
+    let tooltip2 = svg2.select("g#tooltip-2");
+    let details2 = svg2.select("g#details-2");
+    let basemap2 = svg2.select("g#basemap-2")
+    // this is bad
+
+    const tip2 = tooltip2.append("text").attr("id", "tooltip");
+    tip2.attr("text-anchor", "end");
+    tip2.attr("dx", -5);
+    tip2.attr("dy", -5);
+    tip2.style("visibility", "hidden");
+    tooltip2.style.transform = "translateY(50px)";
+
+    const details3 = details2.append("foreignObject")
+      .attr("id", "details")
+      .attr("width", 960)
+      .attr("height", 500)
+      .attr("x", 300)
+      .attr("y", -10);
+
+    const body2 = details3.append("xhtml:body")
+      .style("text-align", "left")
+      .style("background", "none")
+      .html("<p>N/A</p>");
+
+    details2.style("visibility", "hidden");
+
+    let g = svg2.append("g")
+      .attr("class", "key")
+      .attr("transform", "translate(-220, 20)");
+
+    g.selectAll("rect")
+      .data(color2.range().map(function(d) {
+          d = color2.invertExtent(d);
+          if (d[0] == null) d[0] = x2.domain()[0];
+          if (d[1] == null) d[1] = x2.domain()[1];
+          return d;
+        }))
+      .enter().append("rect")
+        .attr("height", 8)
+        .attr("x", function(d) { return x2(d[0]); })
+        .attr("width", function(d) { return x2(d[1]) - x2(d[0]); })
+        .attr("fill", function(d) { return color2(d[0]); });
+
+    g.append("text")
+        .attr("class", "caption")
+        .attr("x", x2.range()[0])
+        .attr("y", -6)
+        .attr("fill", "#000")
+        .attr("text-anchor", "start")
+        .attr("font-weight", "bold")
+        .text("Median Home Price");
+
+    g.call(d3.axisBottom(x2)
+        .tickSize(13)
+        .tickFormat(function(x, i) { return i ? x : x; })
+        .tickValues(color2.domain()))
+      .select(".domain")
+        .remove();
+
+      let mapCountyToPrice = new Map()
+      let mapNameToId = new Map()
+      // first map the county names to the data
+      // do for february 2020 first
+      await d3.csv("./County_Zhvi_AllHomes.csv").then(function(data) {
+        data.forEach((item, i) => {
+            mapCountyToPrice.set(item.RegionName, item[startingDate]);
+        });
+
+      })
+      .catch(function(error){
+         console.log(error)
+      })
+
+      d3.json("https://d3js.org/us-10m.v2.json")
+      .then(function(us) {
+
+      svg2.append("g")
+          .attr("class", "counties")
+          .selectAll("path")
+          .data(topojson.feature(us, us.objects.counties).features)
+          .enter().append("path")
+          .attr("fill", function(d) { return color2(d.properties.price = mapCountyToPrice.get(d.properties.name)); })
+          .attr("d", path2)
+          .append("title")
+          .text(function(d) { return d.properties.price });
+
+          // add tooltips
+          var toolTip = svg2.selectAll('path').on("mouseover", function(d) {
+            handleMouseOver(d)
+            // this is price for whatever reason
+            tip2.text(d.properties.name);
+            tip2.style("visibility", "visible")
+          }).on("mouseout", function(d) {
+            handleMouseOut(d)
+            tip2.style("visibility", "hidden");
+          })
+
+    svg2.append("path")
+        .attr("class", "county-borders")
+        .attr("d", path2(topojson.mesh(us, us.objects.counties, function(a, b) { return a !== b; })));
+
+    let vis = document.getElementsByClassName("counties")[0];
+    vis.style.margin = "50px 50px";
+  }).catch(function(error) {
+    throw(error)
+  });
+
+  function handleMouseOver(d) {
+
+    // use template literal for the detail table
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals
+    const html = `
+      <table id="tooltip-details" border="0" cellspacing="0" cellpadding="2">
+      <tbody>
+        <tr>
+          <th>Name:</th>
+          <td>${d.properties.name}</td>
+        </tr>
+        <tr>
+          <th>Price:</th>
+          <td>${d.properties.price}</td>
+        </tr>
+      </tbody>
+      </table>
+    `;
+
+    body2.html(html);
+    details2.style("visibility", "visible");
+  }
+
+  function handleMouseOut(d) {
+      details2.style("visibility", "hidden");
+  }
+}
+
+async function runEverything2() {
+  await startingData2();
+  await loadMapPrice(startingString);
+}
+
+runEverything2();
+
+    </script>
   <script>
   document.addEventListener('DOMContentLoaded', () => {
     const $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
@@ -430,7 +661,7 @@
     }
   });
   </script>
-  <!-- End mobile menu responsiveness -->
+
   </body>
 
 </html>
