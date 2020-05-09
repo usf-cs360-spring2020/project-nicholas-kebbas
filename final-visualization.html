@@ -28,7 +28,7 @@
     <div class="hero-body">
       <div class="container">
         <!-- TODO: Change title -->
-        <h1 class="title">Housing Inventory And Prices Across States in the United States</h1>
+        <h1 class="title">Housing Inventory And Home Values Across States in the United States</h1>
         <!-- TODO: Change subtitle -->
         <h2 class="subtitle">Final Visualization</h2>
       </div>
@@ -184,7 +184,7 @@
     <div class="content">
     <h2> Prices Across Counties in the United States</h2>
     <h3>Encoding</h3>
-    <p>Home values are encoded by color by county; higher home values are typically a darker shade of blue than lower home values, as indicated by the legend.</p>
+    <p>Home values are encoded by color by county; higher home values are typically a darker shade of blue than lower home values, as indicated by the legend. Please note that we did not control for inflation, so it's expected for the map as a whole to trend darker over time.</p>
 
       <p>Choose Year:
         <select id="option-start-2">
@@ -601,7 +601,7 @@ async function loadMapPrice(startingDate) {
 
     svg2.append("path")
         .attr("class", "county-borders")
-        .attr("d", path2(topojson.mesh(us, us.objects.counties, function(a, b) { return a !== b; })));
+        .attr("d", path2(topojson.mesh(us, us.objects.states, function(a, b) { return a !== b; })));
 
     let vis = document.getElementsByClassName("counties")[0];
     vis.style.margin = "50px 50px";
